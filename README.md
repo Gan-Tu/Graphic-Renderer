@@ -17,20 +17,20 @@ Use these flags between the executable name and the dae file when you invoke the
 
 Flag and parameters | Description
 ----- | ------
--s <INT>  |  Number of camera rays per pixel (default=1, should be a power of 2)
--l <INT>  |  Number of samples per area light (default=1)
--t <INT>  |  Number of render threads (default=1)
--m <INT>  |  Maximum ray depth (default=1)
--f <FILENAME>  | Image (.png) file to save output to in windowless mode
--r <INT> <INT> | Width and height in pixels of output image (if windowless) or of GUI window
--p <x> <y> <dx> <dy>  |  Used with the -f flag to render a cell
--c <FILENAME> |  Load camera settings file (mainly to set camera position when windowless)
--a <INT> <FLOAT>   | Samples per batch and tolerance for adaptive sampling
+-s INT  |  Number of camera rays per pixel (default=1, should be a power of 2)
+-l INT  |  Number of samples per area light (default=1)
+-t INT  |  Number of render threads (default=1)
+-m INT  |  Maximum ray depth (default=1)
+-f FILENAME  | Image (.png) file to save output to in windowless mode
+-r INT INT | Width and height in pixels of output image (if windowless) or of GUI window
+-p x y dx dy  |  Used with the -f flag to render a cell
+-c FILENAME |  Load camera settings file (mainly to set camera position when windowless)
+-a INT FLOAT   | Samples per batch and tolerance for adaptive sampling
 -H | Enable hemisphere sampling for direct lighting
 -h | Print command line help message
 -e | some_map.exr loads an environment light .exr image file 
--b <FLOAT> | sets the lens radius
--d <FLOAT> | sets the focal distance
+-b FLOAT | sets the lens radius
+-d FLOAT | sets the focal distance
 
 
 ## Using the GUI
