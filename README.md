@@ -29,8 +29,8 @@ Flag and parameters | Description
 -H | Enable hemisphere sampling for direct lighting
 -h | Print command line help message
 -e | some_map.exr loads an environment light .exr image file 
--b 1.23 | sets the lens radius to 1.23 
--d 4.56 | sets the focal distance to 4.56 
+-b <FLOAT> | sets the lens radius
+-d <FLOAT> | sets the focal distance
 
 
 ## Using the GUI
