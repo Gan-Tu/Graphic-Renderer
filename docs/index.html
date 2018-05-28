@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="CS184 Ray Tracing Project Part 1 | Gan Tu">
+<meta name="author" content="">
+<link rel="icon" href="assets/img/favicon.ico">
+<title>CS184 Ray Tracing Project Part 1 | Gan Tu</title>
+<!-- Bootstrap core CSS -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Fonts -->
+<link href="assets/css/font-awesome.min.css" rel="stylesheet">
+<link href="assets/css/font.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="assets/css/mediumish.css" rel="stylesheet">
+<link href="assets/css/monokai-sublime.css" rel="stylesheet">
+<link href="assets/css/custom.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Begin Nav
+================================================== -->
+<nav class="navbar navbar-toggleable-md navbar-light bg-white fixed-top mediumnavigation">
+<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="container">
+	<!-- Begin Logo -->
+	<a class="navbar-brand" href="index.html">
+	<img src="./assets/img/logo.png" alt="logo">
+	</a>
+	<!-- End Logo -->
+		<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+		<!-- Begin Menu -->
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item active">
+			<a class="nav-link" href="index.html">Deliverable - Part 1</a>
+			</li>
+			<li class="nav-item">
+			<a class="nav-link" href="index2.html">Deliverable - Part 2</a>
+			</li>
+			<li class="nav-item">
+			<a class="nav-link" href="https://cs184.eecs.berkeley.edu/article/14" target="_blank">Spec</a>
+			</li>
+			<li class="nav-item">
+			<a class="nav-link" href="https://github.com/cs184sp18/proj3_1-pathtracer-Michael-Tu" target="_blank">GitHub</a>
+			</li>
+		</ul>
+		<!-- End Menu -->
+	</div>
+</div>
+</nav>
+<!-- End Nav
+================================================== -->
+
+
+<!-- Return to Top -->
+<a href="javascript:" id="return-to-top">
+	<i class="fa fa-chevron-up"></i>
+</a>
+
+
+<!-- Begin Article
+================================================== -->
+<div class="container">
+	<div class="row">
+
+		<div class="col-md-1 col-xs-12"></div>
+		<!-- Begin Post -->
+		<div class="col-md-10 col-md-offset-2 col-xs-12">
+			<div class="mainheading">
+
+				<!-- Begin Top Meta -->
+				<div class="row post-top-meta">
+					<div class="col-md-2">
+						<a href="http://github.tugan.me"><img class="author-thumb" src="./assets/img/profile-pic.jpg" alt="Gan Tu's Profile Picture"></a>
+					</div>
+					<div class="col-md-10">
+						<a class="link-dark" href="author.html">Gan Tu (Michael) | cs184-adt</a>
+						<span class="author-description">Student of CS 184: Computer Graphics and Imaging, Spring 2018 at UC Berkeley. Officer at Machine Learning at Berkeley. Incoming Machine Learning Intern at Apple Inc.</span>
+						<span class="post-date">3 March 2018</span><span class="dot"></span><span class="post-read">25 min read</span>
+					</div>
+				</div>
+				<!-- End Top Menta -->
+
+				<h1 class="posttitle">Project 3-1: Ray Tracing Part 1</h1>
+
+			</div>
+
+			<!-- Begin Featured Image -->
+			<img class="featured-image img-fluid" src="./assets/img/post/rabit.jpg" alt="featured blog image - tiger">
+			<!-- End Featured Image -->
+
+			<!-- Begin Post Content -->
+			<div class="article-post">
+
+				<!-- Technical details
+
+				Do not convert or resize your .png. files. Use either the command line rendering mode or the S key to save screenshots, not your own OS's utility (like Project 1 but not like Project 2). Keep your images in a subdirectory called images/ in the website/ directory. We recommend using the -r 480 360 command line flag to set resolution at 480 by 360 for all your screenshots. -->
+
+				<h2 id="overview"><b>Overview</b></h2>
+				<p>In this project, I implemented the core routines of a physically-based renderer using a path-tracing algorithm.  I developed algorithms for detecting ray-scene intersections. I built acceleration structures (BVHs) to speed up the CPU rendering time for large images, and I also physically simulated images based lighting and materials. Specifically, I deployed various illumination methods to achieve the final rendering results. To simulate the direct lighting effects, I used a combination of uniform hemisphere illumination and lighting sampling illumination. To simulate the bouncing of lights (or indirect lights), I used recursion with random termination depths like Russian roulette. I also added statistical analysis for early-stopping to reduce the need to sample locations unnecessarily if they are already rendered pretty well, as an additional way to accelerate my ray-tracing algorithms.</p>
+
+				<p>It's pretty amazing to see how we can generate relativistic images by simulating the physics of light and interactions in the physical real world. For example, as we can see below, we are able to generate a relativistic image of diffused material spheres in a box (on the right) based on physical ray-tracing on the model file (on the left). It's pretty astonishing.</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/post/sphere_model.png" class="figure-img img-fluid rounded" alt="Sphere Model">
+							<figcaption class="figure-caption text-center">Sphere Model</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_1024_4.png" class="figure-img img-fluid rounded" alt="Diffused Sphere Rendering">
+							<figcaption class="figure-caption text-center">Diffused Sphere Rendering</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<h2 id="part1"><b>Part 1: Ray Generation and Scene Intersection</b></h2>
+
+				<p>For Ray tracing, we use a pinhole camera model. We shot virtual "eye rays" (or "camera rays" if shotting from a camera) and observe their intersections (reflections, intersections, refractions, etc.) with the physical world in order to assist us in rendering the images. Below is a visual description of what the pinhole camera model is:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/post/pinhole.png" class="figure-img img-fluid rounded" alt="Pinhole Camera Model" width="500px">
+						<figcaption class="figure-caption text-center">Pinhole Camera Model</figcaption>
+					</figure>
+				</div>
+
+				<p>To generate a ray pointing from camera to a specfic point <small><code>(x, y)</code></small>, we first notice that the camera has its own coordinate system, where the camera is positioned at the origin of the camera space, looking along the −z axis and having the +y axis as image space "up". Thus, the <i>origin</i> of our ray will simply be the world coordinates of the camera position, which is also the origin in the camera space. We can get the <i>direction</i> of the ray pointing to the point by finding the unit vector pointing from the camera to that point <small><code>(x, y)</code></small>. Since we are given the horizontal field of view and vertical field of view angles of the camera, we can get the local coordinate of <small><code>(x, y)</code></small> in camera space by mapping <small><code>(0,0)</code></small> to bottom left (<small><code>Vector3D(-tan(radians(hFov)*.5), -tan(radians(vFov)*.5),-1)</code></small>) and <small><code>(1,1)</code></small> to top right (<small><code>Vector3D( tan(radians(hFov)*.5),  tan(radians(vFov)*.5),-1)</code></small>) in the sensor. Then, we convert the directional vector to the normal vector in the world space, and then the origin and the direction forms the camera ray that we generated.</p>
+
+				<p>To test if the ray intersects with a triangle, we use the Moller Trumbore Algorithm below, which gives us the intersection point of an ray to a triangle defined by the three points P0, P1, and P2, if there is any valid intersection. It also gives us the barycentric coordinates that we can use to derive the normal vector of the intersection point.</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/post/moller-trumbore.png" class="figure-img img-fluid rounded" alt="Moller Trumbore Algorithm" width="500px">
+						<figcaption class="figure-caption text-center">Moller Trumbore Algorithm</figcaption>
+					</figure>
+				</div>
+
+				<p>In a high level, what this algorithm is doing is that: from the perspective barycentric coordinates, the intersection point can always be interpreted as a linear combination among the three vertices, regardless of the coordinate system. At the same time, the intersection point can be parametrized by the origin of the ray, the direction of the ray, and the distance it traveled. Thus we can set up the equation at the to. Then, by moving parameters around, we can solve this system of equation for the distance traveled by the ray from the origin in the direction of its directional vector: <small><code>t</code></small> in a matrix form as described below in the algorithm. The value of <small><code>b1</code></small> and <small><code>b2</code></small> can also be derived from the equation by algebraic manipulations. If the distance traveled <small><code>t</code></small> is within the range of the ray segment (the start as <small><code>r.min_t</code></small> and the end as <small><code>r.ax_t</code></small>), we know it's a valid intersection. Otherwise, it's not. </p>
+
+				<p>To test the intersection against the sphere, we use a similar approach where we can solve the intersection points of an ray to a sphere in a closed quadratic form as below:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/post/sphere-intersection.png" class="figure-img img-fluid rounded" alt="Closed Form Solution for Sphere Intersection with Rays" width="500px">
+						<figcaption class="figure-caption text-center">Closed Form Solution for Sphere Intersection with Rays</figcaption>
+					</figure>
+				</div>
+
+				<p>In a high level, I first calculate the delta <small><code>b^2-4ac</code></small>. If it's negative, the quadratic equation does not have a solution, so we don't have an intersection. If the value is zero, we have one intersection. If it's positive, we have two intersections. Once we solve for <small><code>t</code></small>, we then check, the same as what we did for the triangle case, if the distance traveled <small><code>t</code></small> is within the range of the ray segment (the start as <small><code>r.min_t</code></small> and the end as <small><code>r.ax_t</code></small>). If <small><code>t1</code></small> (the smaller of the two <small><code>t</code></small> values) is in the range, it's the closet intersection we are looking for. If <small><code>t1</code></small> is out of range but <small><code>t2</code></small> is in the range, then <small><code>t2</code></small> is our first intersection. Otherwise, there's still no intersections.</p>
+
+				<p>Below are some examples of rendered small <small><code>.dae</code></small> files:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/spheres_16_4_6.png" class="figure-img img-fluid rounded" alt="Spheres with Normal Shading">
+							<figcaption class="figure-caption text-center">Spheres with Normal Shading</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/gems_16_4_6.png" class="figure-img img-fluid rounded" alt="Gems with Normal Shading">
+							<figcaption class="figure-caption text-center">Gems with Normal Shading</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<h2 id="part2"><b>Part 2: Bounding Volume Hierarchy</b></h2>
+
+				<p>To accelerate the rendering pipeline, we used a technique called Bounding Volume Hierarchy (BVH), where we partition objects spatially into different bounding boxes. We test the existence of an intersection against each bounding box first, before we test intersections on each object. In this way, if a ray misses the bounding box, we don't have to test any of the objects inside, thus speeding up the process.</p>
+
+				<p>First, we will construct our BVH and spatially partition the objects into different bounding boxes, all stored in a tree-like structure as depicted below:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/post/bvh.png" class="figure-img img-fluid rounded" alt="Bounding Volume Hierarchy" width="500px">
+						<figcaption class="figure-caption text-center">Bounding Volume Hierarchy</figcaption>
+					</figure>
+				</div>
+
+				<p>My BVH construct algorithm works as follows.</p>
+				<ul>
+					<li>Loop through all the objects (or primitives) needed for partition and create a tight bounding box that contains all the primitives.</li>
+					<li>If the number of primitives left is no more than the max number of primitives we store for each leaf node, we contain all the primitives in a leaf node and terminate the algorithm, as we have met our termination criteria.</li>
+					<li>Otherwise, we pick the axis of the current bounding box (which contains all current primitives from first step) that has the biggest extent (or length of axis). We split at the midpoint of this axis.</li>
+					<ul>
+						<li>We loop through every primitive. If the centroid of the primitive is on the left side of the split midpoint, we assign it to the left cluster. Otherwise, we put it in the right cluster.</li>
+						<li>Then, we recursively repeat the above instructions on these clusters to construct BVHs for these sub-clusters, until all primitives are split and assigned to a leaf node.</li>
+					</ul>
+					<li>However, there are few edge cases we will deal with. The heuristic I chose here is the midpoint of max-extent axis of the bounding box of all primitives left so far. It's perfectly possible that upon a split, all primitives will still lay in the same cluster as the other half is empty. If this is the case, we recursively split on the midpoint of the side that has primitives, until either there's a valid split or a maximum of splits have been attempted. If the latter case occurs, we will attempt to split on another axis.</li>
+				</ul>
+
+				<p>For BVH intersection testing, the high level algorithm is that: if the ray misses the main bounding box, it will miss all the primitives inside the bounding box and thus return no intersections found. If we reach a leaf node, we will test intersections with every primitive contained inside this node. Otherwise, we return the closest intersection from the intersections of the ray and both child clusters by calling the algorithm recursively.</p>
+
+				<p>To test if a ray intersects with an axis aligned bounding box, we test if the distances from the origin of the ray to each axis of the bounding box respectively, and find the largest overlapping interval of the intersection segments in all axis. If such an overlapping interval exists, we know the ray intersects with the box. Otherwise, the intersection mises the box. The high level idea in 2D is described below:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/post/bbox.png" class="figure-img img-fluid rounded" alt="Ray Intersection with Axis-Aligned Bounding Box" width="500px">
+						<figcaption class="figure-caption text-center">Ray Intersection with Axis-Aligned Bounding Box</figcaption>
+					</figure>
+				</div>
+
+				<p>Below is an example of generated bounding boxes around a cow model. As we can see, they do a pretty good job in terms of approximating and bounding the model.</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/result/part2/cow_bbox.png" class="figure-img img-fluid rounded" alt="Bounding Box for Cow" width="500px">
+						<figcaption class="figure-caption text-center">Bounding Box for Cow</figcaption>
+					</figure>
+				</div>
+
+				<p>Below are some examples of rendered large <small><code>.dae</code></small> files that we usually couldn't render without the acceleration structure:</p>
+
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/maxplanck_with_accl.png" class="figure-img img-fluid rounded" alt="Maxplanck">
+							<figcaption class="figure-caption text-center">Maxplanck</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/beast_with_accl.png" class="figure-img img-fluid rounded" alt="Beast">
+							<figcaption class="figure-caption text-center">Beast</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/teapot_with_accl.png" class="figure-img img-fluid rounded" alt="Teapot (Side View)">
+							<figcaption class="figure-caption text-center">Teapot (Side View)</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/teapot_with_accl_2.png" class="figure-img img-fluid rounded" alt="Teapot (Top View)">
+							<figcaption class="figure-caption text-center">Teapot (Top View)</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/cow_with_accl.png" class="figure-img img-fluid rounded" alt="Cow (Front View)">
+							<figcaption class="figure-caption text-center">Cow (Front View)</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/cow_with_accl_2.png" class="figure-img img-fluid rounded" alt="Cow (Side ">
+							<figcaption class="figure-caption text-center">Cow (Side View)</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/cblucy_with_accl.png" class="figure-img img-fluid rounded" alt="Angel">
+							<figcaption class="figure-caption text-center">Angel</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part2/beetle_with_accl.png" class="figure-img img-fluid rounded" alt="Beetle">
+							<figcaption class="figure-caption text-center">Beetle</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>To showcase the effects of the BVH acceleration structure, I conducted the following rendering speed experiments on some of the scenes above.</p>
+
+				<table class="table table-striped">
+					<thead class="">
+						<tr>
+							<th scope="col"></th>
+							<th scope="col">Cow</th>
+							<th scope="col">Teapot</th>
+							<th scope="col">Maxplanck</th>
+							<th scope="col">Lucy</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<tr>
+							<th scope="row"><small>Original Rendering Time</small></th>
+							<td>938.4110s</td>
+							<td>394.8520s</td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row"><small>Accelerated Rendering Time</small></th>
+							<td>2.3335s</td>
+							<td>1.5884s</td>
+							<td>2.9929s</td>
+							<td>1.3188s</td>
+						</tr>
+						<!-- <tr>
+							<th scope="row"><small>Original Rays Traced</small></th>
+							<td>1918154</td>
+							<td>1913649</td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row"><small>Accelerated Rays Traced</small></th>
+							<td>1844390</td>
+							<td>1735973</td>
+							<td>1840995</td>
+							<td>1810398</td>
+						</tr> -->
+						<tr>
+							<th scope="row"><small>Original Avg. Intersection Tests per ray</small></th>
+							<td>2958.025862</td>
+							<td>1215.659140</td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row"><small>Accelerated Avg. Intersection Tests per ray</small></th>
+							<td>3.154083</td>
+							<td>2.465466</td>
+							<td>3.995419</td>
+							<td>0.971727</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<p>As we can clearly see, with the BVH acceleration structure, our algorithm speeds up the rendering time by as much as 469 times! The average number of intersection tests performed on each ray also decreases by a factor of at most 980 times! Specifically, we found that the average of intersections test performed for any particular ray is around 3-4 tests, and the whole rendering time is below 3 seconds. Intuitively, this makes sense. Since our algorithm have partitioned objects into a tree-like structure based on it's spatial information, our intersection algorithm rejects 1/2 of the primitives remaining directly each time if the ray misses the bounding box of either child cluster for all the primitives it contains. As a consequence, we not only have fewer intersection tests with each primitive, reducing the number of computation intensive primitive testing dramatically both per primitive but as a whole. Our intersection algorithm also updates the segment range of a ray when it intersects anything. The intuition behind this is that we are trying to find the closest intersection of a ray amongst all objects, so the intersections beyond an found intersection will never be closer than the current intersection. Thus, the future testing of primitive intersection also gets sped up, resulting in a very small amount of intersection tests performed on each ray.</p>
+
+
+				<h2 id="part3"><b>Part 3: Direct Illumination</b></h2>
+
+				<p>In this project I implemented two direct lighting functions. One is uniform hemisphere sampling, and the other one is importance sampling by sampling over lights.</p>
+
+				<p>In Uniform Hemisphere Sampling, first we shoot a ray and see if it intersects with the bounding box of all primitives. If not, there's nothing to render from this ray because the ray doesn't bounce off any object. If the ray intersects with any object, we sample a number of directions at the intersection point over hemisphere uniformly in a solid angle. We shot another ray from the intersection point to each of the randomly sampled outgoing direction and get the radiance along this ray. If the ray hits something, we ask for the radiance at that intersection using it's bsdf. We use Monte Carlo integration to approximate the value of the integration, so we divide the radiance by the probability of sampling an ray in that direction (1/2-pi). Since we also need to take into account Lambert's Cosine Law, which gives us a cosine factor depending on the angle at which the ray enters the hemisphere, we will also divide by the cosine of incoming direction. The resulting value will be the irradiance from the environment at that intersection point using uniform hemisphere sampling.</p>
+
+				<p>In Importance Sampling Over Sampling Lights, the idea is generally the same as the uniform hemisphere sampling but now we actually know where the lights are so we sample them directly, so we will loop through each scene light. If it's a delta light, we sample only once. Otherwise we still sample multiple times like the uniform hemisphere sampling. We also get value of the pdf, bsdf, and distance to the intersection point directly from a spectrum sampled from the light.</p>
+
+				<p>Below is an example of the idea in the realm of ray tracing:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/post/ray-tracing.png" class="figure-img img-fluid rounded" alt="Ray Tracing" width="500px">
+						<figcaption class="figure-caption text-center">Ray Tracing</figcaption>
+					</figure>
+				</div>
+
+
+				<p>Below we compare the images rendered with both implementations of the direct lighting functions respectively: (1) Uniform Hemisphere Sampling, and (2) Importance sampling by sampling over lights (Lighting Sampling):</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny_hemisphere_64_32.png" class="figure-img img-fluid rounded" alt="Bunny scene with Uniform Hemisphere Sampling">
+							<figcaption class="figure-caption text-center">Bunny scene with Uniform Hemisphere Sampling</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny-importance-64_32.png" class="figure-img img-fluid rounded" alt="Bunny scene with Lighting Sampling">
+							<figcaption class="figure-caption text-center">Bunny scene with Lighting Sampling</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>As we can see, there are a few differences between the hemisphere sampling and lighting sampling under same parameters. First, as we can see, the uniform hemisphere sampling produces more noise than the importance sampling. This makes sense because in lighting sampling we actually know where the lights are, so we are making more informed sampling decisions. Second, as we can see from the lighting on the head of the rabbit, the uniform hemisphere sampling seems to produce more light and make the image brighter than the lighting sampling. Overall, it seems that lighting sampling produces better quality results because the lights are more uniformly spread and the noise level is small.</p>
+
+				<p>Below we compare the noise levels in soft shadows of the bunny scene (with at least one area light) at various number of light rays, fixed at 1 sample per pixel using lighting sampling:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny_1_1.png" class="figure-img img-fluid rounded" alt="Bunny scene with 1 light rays">
+							<figcaption class="figure-caption text-center">Bunny scene with 1 light ray</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny_1_4.png" class="figure-img img-fluid rounded" alt="Bunny scene with 4 light rays">
+							<figcaption class="figure-caption text-center">Bunny scene with 4 light rays</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny_1_16.png" class="figure-img img-fluid rounded" alt="Bunny scene with 16 light rays">
+							<figcaption class="figure-caption text-center">Bunny scene with 16 light rays</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny_1_64.png" class="figure-img img-fluid rounded" alt="Bunny scene with 64 light rays">
+							<figcaption class="figure-caption text-center">Bunny scene with 64 light rays</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>As we can see, with more light rays, the noise level in soft shadows decreases and the image also looks much smoother and relativistic.</p>
+
+				<p>Below I show more rendering images rendered through lighting sampling: </p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/bunny2-importance-64_32.png" class="figure-img img-fluid rounded" alt="Bunny scene with Lighting Sampling">
+							<figcaption class="figure-caption text-center">Bunny scene with Lighting Sampling</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part3/dragon-importance-64_32.png" class="figure-img img-fluid rounded" alt="Dragon scene with Lighting Sampling">
+							<figcaption class="figure-caption text-center">Dragon scene with Lighting Sampling</figcaption>
+						</figure>
+					</div>
+				</div>
+
+
+				<h2><b>Part 4: Global Illumination</b></h2>
+				
+				<p>Aside from the direct illumination, we can also render images using a combination of direct and indirect illuminations.</p>
+
+				<p>To implement the indirect lighting, I adapt the idea of Russian roulette. In a high level, the idea is that we first calculate the illumination from the ray hitting anything and then bounce the light rays off and keep calculating the radiance and irradiance with a certain probability. However, like a Russian roulette, it has a probability to terminate and not bounce off anymore, or until the manually set limit for the max amount of depth is reached. I implement this by setting the depth of rays initially to the max ray bouncing depth, and recurse on the function to keep calculating the radiance with a probability of 0.6. We multiply the result with the spectrum sampled from the light, multiplies with the cosine term, divide by the pdf from the sampled bsdf and also divide the probability of not terminating the recursion (0.6) to get the actual expected radiance.</p>
+
+				<p>Below are some examples of images rendered with global (direct and indirect) illumination:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/banana_1024_4.png" class="figure-img img-fluid rounded" alt="scene with Global Illumination">
+							<figcaption class="figure-caption text-center">Dragon scene with Global Illumination</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/building_1024_4.png" class="figure-img img-fluid rounded" alt="scene with Global Illumination">
+							<figcaption class="figure-caption text-center">Building scene with Global Illumination</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/dragon_1024_4.png" class="figure-img img-fluid rounded" alt="scene with Global Illumination">
+							<figcaption class="figure-caption text-center">Dragon scene with Global Illumination</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/bench_1024_4.png" class="figure-img img-fluid rounded" alt="scene with Global Illumination">
+							<figcaption class="figure-caption text-center">Bench scene with Global Illumination</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>Now, we will compare rendered global illumination views with both <i>only</i> direct illumination, then <i>only</i> indirect illumination:</p>
+
+				<div class="text-center">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_global_64_16.png" class="figure-img img-fluid rounded" alt="Global Illumination" width="400px">
+							<figcaption class="figure-caption text-center">Global Illumination</figcaption>
+						</figure>
+					</div>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_direct_64_16.png" class="figure-img img-fluid rounded" alt="Direct Illumination">
+							<figcaption class="figure-caption text-center">Direct Illumination</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_indirect-partial.png" class="figure-img img-fluid rounded" alt="Indirect Illumination">
+							<figcaption class="figure-caption text-center">Indirect Illumination</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>Now, we will compare rendered views with different <small><code>max_ray_depth</code></small> (the max number of ray bounces):</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/bunny_64_16_0.png" class="figure-img img-fluid rounded" alt="Bunny scene with 0 bounce of light">
+							<figcaption class="figure-caption text-center">Bunny scene with 0 bounce of light</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/bunny_64_16_1.png" class="figure-img img-fluid rounded" alt="Bunny scene with 1 bounce of light">
+							<figcaption class="figure-caption text-center">Bunny scene with 1 bounce of light</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/bunny_64_16_2.png" class="figure-img img-fluid rounded" alt="Bunny scene with 2 bounces of light">
+							<figcaption class="figure-caption text-center">Bunny scene with 2 bounces of light</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/bunny_64_16_3.png" class="figure-img img-fluid rounded" alt="Bunny scene with 3 bounces of light">
+							<figcaption class="figure-caption text-center">Bunny scene with 3 bounces of light</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/result/part4/bunny_64_16_100.png" class="figure-img img-fluid rounded" alt="Bunny scene with 100 bounces of light" width="400px">
+						<figcaption class="figure-caption text-center">Bunny scene with 100 bounces of light</figcaption>
+					</figure>
+				</div>
+
+				<p>As we can see, with more bounces of light, the images become brighter but converge to a uniform lighting pretty quickly so the rate of illumination boast decreases as we have more bounces of light, and of course, longer time is needed for the rendering.</p>
+
+				<p>Now, we'll compare rendered views with various <small><code>sample-per-pixel</code></small> rates:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_1_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 1 sample-per-pixel rate">
+							<figcaption class="figure-caption text-center">Sphere scene with 1 sample-per-pixel rate</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_2_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 2 sample-per-pixel rate">
+							<figcaption class="figure-caption text-center">Sphere scene with 2 sample-per-pixel rate</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_4_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 4 sample-per-pixel rate">
+							<figcaption class="figure-caption text-center">Sphere scene with 4 sample-per-pixel rate</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_8_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 8 sample-per-pixel rate">
+							<figcaption class="figure-caption text-center">Sphere scene with 8 sample-per-pixel rate</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_16_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 16 sample-per-pixel rate">
+							<figcaption class="figure-caption text-center">Sphere scene with 16 sample-per-pixel rate</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part4/spheres_64_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 64 sample-per-pixel rate">
+							<figcaption class="figure-caption text-center">Sphere scene with 64 sample-per-pixel rate</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<div class="text-center">
+					<figure class="figure">
+						<img src="./assets/img/result/part4/spheres_1024_4.png" class="figure-img img-fluid rounded" alt="Sphere scene with 1024 sample-per-pixel rate" width="400px">
+						<figcaption class="figure-caption text-center">Sphere scene with 1024 sample-per-pixel rate</figcaption>
+					</figure>
+				</div>
+
+				<p>As we can see,  the noise level in soft shadows decreases as we have more samples per pixel, and of course, longer time is needed for the rendering. Also, for a <small><code>sample-per-pixel</code></small> of 1024, the image looks mostly noise-free at a very high quality.</p>
+
+				<h2><b>Part 5: Adaptive Sampling</b></h2>
+				<p>As we see previously, Monte Carlo path tracing is very powerful in generating realistic images, but it always results in a large amount of noise, which can be eliminated by increasing the number of samples per pixel. The number of computations needed increases linearly with the sample rate.</p>
+
+				<p>However, it turns out that we usually don't have to do this uniformly for all pixels. Some pixels converge faster with low sampling rates, while other pixels require many more samples to get rid of noise. Thus, we can adapt statistics to early-stop sampling on certain pixels if we are confident enough that the pixel values have converged.</p>
+
+				<p>My adaptive sampling algorithm works like this. For each sample ray we draw, we calculate a spectrum of radiance from that sample ray. We keep a running statistics of the average illuminance and variance so far for the specific pixel we are computing the radiance on, as we draw more sample rays. We stop sampling when we are 95% confident statistically that the pixel has converged, based on the variance and average illuminance for the number of samples drawn so far.</p>
+
+				<p>Specifically for the implementation of the adaptive sampling algorithm, I keep two variables: one storing the running sum of illuminance and the other storing the running sum of the squared value of the illuminance. By doing so, we can use a quick formula to calculate the mean and the variance, without storing the illuminance for each sample. Then, instead of checking for a pixel's convergence for each new sample, we want to avoid computing it any more frequently than we need to, so for every samplesPerBatch, we calculate the mean and the variance based on the two variables stored above. Then, we check if <small><code>I=1.96 * sigma / sqrt(n)</code></small> where sigma is the standard deviation and n is the number of samples that we have sampled so far. We stop sampling once <small><code>I < maxTolerance * mu</code></small> where maxTolerance is a ratio of the margin of error we can accept for statistical confidence and mu is the mean.</p>
+
+				<p>Below is an example where we could clearly see the visible sampling rate difference over various regions and pixels in the adaptive sampling method, given the same noise-free rendering</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part5/bunny.png" class="figure-img img-fluid rounded" alt="Bunny Noise-free Rendering">
+							<figcaption class="figure-caption text-center">Bunny Noise-free Rendering</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part5/bunny_rate.png" class="figure-img img-fluid rounded" alt="Bunny Sampling Rate Image">
+							<figcaption class="figure-caption text-center">Bunny Sampling Rate Image</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>It's clearly visible that the sampling rate is mostly concentrated on the rabbit itself and the ceilings; not much in the light; and medium on the side walls and the floor. The adaptive sampling thus avoids the fixed high number of samples per pixel by concentrating the samples in the more difficult parts of the image, reducing the unnecessary computations and speeding up the rendering.</p>
+
+
+			</div>
+			<!-- End Post Content -->
+
+			<!-- Begin Tags -->
+			<div class="after-post-tags">
+				<ul class="tags">
+					<li><a href="#" class="disabled">Ray Tracing</a></li>
+					<li><a href="#" class="disabled">Path Tracer</a></li>
+					<li><a href="#" class="disabled">Illumination</a></li>
+					<li><a href="#" class="disabled">Computer Graphics</a></li>
+				</ul>
+			</div>
+			<!-- End Tags -->
+
+		</div>
+		<!-- End Post -->
+
+	</div>
+</div>
+<!-- End Article
+================================================== -->
+
+<div class="hideshare"></div>
+
+<!-- Begin Footer
+================================================== -->
+<div class="container">
+	<div class="footer">
+		<p class="pull-left">
+			 Copyright &copy; CS 184: Computer Graphics and Imaging, Spring 2018
+		</p>
+		<p class="pull-right">
+			 Gan Tu, cs184-adt
+		</p>
+		<div class="clearfix">
+		</div>
+	</div>
+</div>
+<!-- End Footer
+================================================== -->
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="./assets/js/jquery.min.js"></script>
+<script src="./assets/js/tether.min.js"></script>
+<script src="./assets/js/bootstrap.min.js"></script>
+<script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+<script src="./assets/js/mediumish.js"></script>
+<script src="./assets/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+	// ===== Scroll to Top ==== 
+$(window).scroll(function() {
+    if ($(this).scrollTop() >= 50) {        // If page is scrolled more than 50px
+        $('#return-to-top').fadeIn(200);    // Fade in the arrow
+    } else {
+        $('#return-to-top').fadeOut(200);   // Else fade out the arrow
+    }
+});
+$('#return-to-top').click(function() {      // When arrow is clicked
+    $('body,html').animate({
+        scrollTop : 0                       // Scroll to top of body
+    }, 500);
+});
+</script>
+</body>
+</html>

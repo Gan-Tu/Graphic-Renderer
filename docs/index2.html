@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="CS184 Ray Tracing Project Part 2 | Gan Tu">
+<meta name="author" content="">
+<link rel="icon" href="assets/img/favicon.ico">
+<title>CS184 Ray Tracing Project Part 2 | Gan Tu</title>
+<!-- Bootstrap core CSS -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Fonts -->
+<link href="assets/css/font-awesome.min.css" rel="stylesheet">
+<link href="assets/css/font.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="assets/css/mediumish.css" rel="stylesheet">
+<link href="assets/css/monokai-sublime.css" rel="stylesheet">
+<link href="assets/css/custom.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Begin Nav
+================================================== -->
+<nav class="navbar navbar-toggleable-md navbar-light bg-white fixed-top mediumnavigation">
+<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="container">
+	<!-- Begin Logo -->
+	<a class="navbar-brand" href="index.html">
+	<img src="./assets/img/logo.png" alt="logo">
+	</a>
+	<!-- End Logo -->
+		<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+		<!-- Begin Menu -->
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item">
+			<a class="nav-link" href="index.html">Deliverable - Part 1</a>
+			</li>
+			<li class="nav-item active">
+			<a class="nav-link" href="index2.html">Deliverable - Part 2 <span class="sr-only">(current)</span></a>
+			</li>
+			<li class="nav-item">
+			<a class="nav-link" href="https://cs184.eecs.berkeley.edu/article/22" target="_blank">Spec</a>
+			</li>
+			<li class="nav-item">
+			<a class="nav-link" href="https://github.com/cs184sp18/proj3_2-pathtracer-Michael-Tu" target="_blank">GitHub</a>
+			</li>
+		</ul>
+		<!-- End Menu -->
+	</div>
+</div>
+</nav>
+<!-- End Nav
+================================================== -->
+
+
+<!-- Return to Top -->
+<a href="javascript:" id="return-to-top">
+	<i class="fa fa-chevron-up"></i>
+</a>
+
+
+<!-- Begin Article
+================================================== -->
+<div class="container">
+	<div class="row">
+
+		<div class="col-md-1 col-xs-12"></div>
+		<!-- Begin Post -->
+		<div class="col-md-10 col-md-offset-2 col-xs-12">
+			<div class="mainheading">
+
+				<!-- Begin Top Meta -->
+				<div class="row post-top-meta">
+					<div class="col-md-2">
+						<a href="http://github.tugan.me"><img class="author-thumb" src="./assets/img/profile-pic.jpg" alt="Gan Tu's Profile Picture"></a>
+					</div>
+					<div class="col-md-10">
+						<a class="link-dark" href="author.html">Gan Tu (Michael) | cs184-adt</a>
+						<span class="author-description">Student of CS 184: Computer Graphics and Imaging, Spring 2018 at UC Berkeley. Officer at Machine Learning at Berkeley. Incoming Machine Learning Intern at Apple Inc.</span>
+						<span class="post-date" id="post-date">26 March 2018</span><span class="dot"></span><span class="post-read">20 min read</span>
+					</div>
+				</div>
+				<!-- End Top Menta -->
+
+				<h1 class="posttitle">Project 3-2: Ray Tracing Part 2</h1>
+
+			</div>
+
+			<!-- Begin Featured Image -->
+			<img class="featured-image img-fluid" src="./assets/img/post/hero.jpg" alt="hero header">
+			<!-- End Featured Image -->
+
+			<!-- Begin Post Content -->
+			<div class="article-post">
+
+				<h2 id="overview"><b>Overview</b></h2>
+				<p>In this project, I extended the functionalities of my last ray tracing rendering pipeline by adding support for rendering models with materials, rendering with environment lights, controlling aperture size and focal length of the camera for depth of field effects, and rendering in real time with basic GLSL shaders. Specifically, I added support for rendering glass and mirror materials by implementing their bsdf, and I added support for rendering custom materials by implementing microfacet materials.</p>
+
+				<h2 id="part1"><b>Part 1: Mirror and Glass Materials</b></h2>
+
+				<p>An rendering engine is much more powerful if it supports more materials that it can render. In part 1, I added support for mirror and glass materials. Below is a sequence of images of rendered with varying max depth to bounce for ray tracing, with at least 64 samples per pixel and 4 samples per light, on a scene with both glass and mirror materials.</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m0.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 0">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 0</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m1.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 1">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 1</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m2.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 2">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 2</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m3.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 3">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 3</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m4.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 4">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 4</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m5.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 5">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 5</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-m100.png" class="figure-img img-fluid rounded" alt="Max Ray Depth of 100">
+							<figcaption class="figure-caption text-center">Max Ray Depth of 100</figcaption>
+						</figure>
+					</div>
+					<div class="col-md-6">
+						<figure class="figure">
+							<img src="./assets/img/result/part1/part1-high_res.png" class="figure-img img-fluid rounded" alt="High Resolution">
+							<figcaption class="figure-caption text-center">High Resolution</figcaption>
+						</figure>
+					</div>
+				</div>
+
+				<p>As we can see, there is clear multibounce effects. When max ray depth is 0, we effectively only have light emissions. When max ray depth is 1, the light has lightened up the walls but the balls and the ceilings are still black because the light hasn't reflected or refracted to render them yet. When max ray depth is 2, we see the the ceilings and the mirror ball have been rendered a bit as well as the highlight reflection on the glass ball is also rendered a bit. When max ray depth is 3, both balls have been relatively rendered as light is able to also refract through the glass ball, but notice how the glass ball on the right still doesn't have bright light in the shadows. The shadow for glass ball only shows bright lights refracted from the ceiling lights at the max ray depth of 4, and the highlight reflected to the right wall at the bottom corner shows up at max ray depth of 5. As we keep increasing the max ray depth, the changes are less obvious but converges to a less noisy picture.</p>
+
+
+				<h2 id="part2"><b>Part 2: Microfacet Material</b></h2>
+
+				<p>An rendering engine is much more powerful if it supports more materials that it can render. In part 1, I added support for microfacet materials. Below is a sequence of images of microfacet materials rendered with different roughness of macro surface for a gold dragon, rendered at least 128 samples per pixel, 1 samples per light, and at most 5 bounces. </p>
+
+				<div class="row">
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part2/part2-dragon-a0.005.png" class="figure-img img-fluid rounded" alt="Gold Dragon with alpha 0.005">
+					        <figcaption class="figure-caption text-center">Gold Dragon with alpha 0.005</figcaption>
+					    </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part2/part2-dragon-a0.05.png" class="figure-img img-fluid rounded" alt="Gold Dragon with alpha 0.05">
+					        <figcaption class="figure-caption text-center">Gold Dragon with alpha 0.05</figcaption>
+					    </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part2/part2-dragon-a0.25.png" class="figure-img img-fluid rounded" alt="Gold Dragon with alpha 0.25">
+					        <figcaption class="figure-caption text-center">Gold Dragon with alpha 0.25</figcaption>
+					    </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part2/part2-dragon-a0.5.png" class="figure-img img-fluid rounded" alt="Gold Dragon with alpha 0.5">
+					        <figcaption class="figure-caption text-center">Gold Dragon with alpha 0.5</figcaption>
+					    </figure>
+					</div>
+				</div>
+
+				<p>As we can see, as we increase the roughness of the macro surface, the dragon looks less and less reflective and are smoother. The color of the dragon also has fewer contrasting surface colors and reflections, and it looks more evenly spread out like a diffused material.</p>
+
+				<p>Below is a sequence of images rendered using cosine hemisphere sampling and importance sampling, at a fixed sampling rate of 64 samples per pixel, 1 samples per light, and at least 5 bounces.</p>
+
+				<div class="row">
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part2/part2-bunny-hemisphere.png" class="figure-img img-fluid rounded" alt="Copper Bunny Cosine Hemisphere Sampling">
+					        <figcaption class="figure-caption text-center">Copper Bunny Cosine Hemisphere Sampling</figcaption>
+					    </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part2/part2-bunny-importance.png" class="figure-img img-fluid rounded" alt="Copper Bunny Importance Sampling">
+					        <figcaption class="figure-caption text-center">Copper Bunny Importance Sampling</figcaption>
+					    </figure>
+					</div>
+				</div>
+
+				<p>As we can see, the cosine hemisphere sampling produces a much more noisy result with lots of black spots all over the place, but the importance sampling produces a well-lit rendering at reasonably well rendered material detail, such as reflections. The importance sampling also produces much less noise.</p>
+
+				<p>In this implementation, I added support for microfacet material, so we can also customize the conductor material of any model. It's pretty powerful. For example, below is an image of an aluminum dragon instead:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+					     <img src="./assets/img/result/part2/part2-dragon-aluminum.png" class="figure-img img-fluid rounded" alt="Aluminum Dragon">
+					     <figcaption class="figure-caption text-center">Aluminum Dragon</figcaption>
+					 </figure>
+				</div>
+
+
+				<h2 id="part3"><b>Part 3: Environment Light</b></h2>
+
+				<p>We can also render models in specific environment where the material itself is rendered based on an environment given. A new type of light source is given: an infinite environment light, which supplies incident radiance from all directions. Specifically, the source is thought to be "infinitely far away" and is representative of realistic lighting environments in the real world.</p>
+
+				<p>Rendering using environment lighting can be quite striking. For example, we can render objects in an environment like this:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+					     <img src="./assets/img/result/part3/grace.jpg" class="figure-img img-fluid rounded" alt="Environment Map" width="600px">
+					     <figcaption class="figure-caption text-center">Environment Map</figcaption>
+					 </figure>
+				</div>
+
+				<p>Much like light in the real world, most of the energy provided by an environment light source is concentrated in the directions toward bright light sources. Therefore, it makes sense to bias selection of sampled directions towards the directions for which incoming radiance is the greatest.</p> 
+
+				<p> Therefore, the basic idea of rendering environment map lights is that we will assign a probability to each pixel in the environment map based on the total flux passing through the solid angle it represents. This will be our strategy for sampling the environment map based distribution. Specifically, the probability distribution for which we will sample from for the environment shown above is calculated to be as follows:</p>
+
+				<div class="text-center">
+					<figure class="figure">
+					     <img src="./assets/img/result/part3/probability_debug.png" class="figure-img img-fluid rounded" alt="Probability Distribution" width="600px">
+					     <figcaption class="figure-caption text-center">Probability Distribution</figcaption>
+					 </figure>
+				</div>
+
+				<p>Below is a rendering of diffused bunny in the environment, rendered with 4 samples per pixel and 64 samples per light in each.</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						 <figure class="figure">
+						    <img src="./assets/img/result/part3/part3-bunny-unlit-uniform.png" class="figure-img img-fluid rounded" alt="Bunny Uniform Sampling">
+						    <figcaption class="figure-caption text-center">Bunny Uniform Sampling</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+						 <figure class="figure">
+						    <img src="./assets/img/result/part3/part3-bunny-unlit-importance.png" class="figure-img img-fluid rounded" alt="Bunny Importance Sampling">
+						    <figcaption class="figure-caption text-center">Bunny Importance Sampling</figcaption>
+						 </figure>
+					</div>
+				</div>
+
+				<p>As we can see, there's a lot of noise for uniform sampling and the object looks barely visible or rendered clearly, but the importance sampling gives us a much well rendered result, despite noise.</p>
+				
+				<p>Below is a rendering of bunny with copper microfacet material in the environment, rendered with 4 samples per pixel and 64 samples per light in each.</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+					        <img src="./assets/img/result/part3/part3-bunny-microfacet-uniform.png" class="figure-img img-fluid rounded" alt="Copper Bunny Uniform Sampling">
+					        <figcaption class="figure-caption text-center">Copper Bunny Uniform Sampling</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part3/part3-bunny-microfacet-importance.png" class="figure-img img-fluid rounded" alt="Copper Bunny Importance Sampling">
+					        <figcaption class="figure-caption text-center">Copper Bunny Importance Sampling</figcaption>
+						 </figure>
+					</div>
+				</div>
+
+				<p>As we can see, there's a lot of noise for uniform sampling still and the importance sampling still gives us a much well rendered result, despite noise. Therefore, it seems that importance sampling outperforms uniform sampling regardless of whether it's microfacet materials.</p>
+
+				<h2 id="part4"><b>Part 4: Depth of Field</b></h2>
+
+				<p>In this part, I am going to simulate a thin lens to enable the depth of field effect for my rendering. I do so by modeling my ray generation for cameras as a pinhole camera model.</p>
+
+
+				<div class="text-center">
+					<figure class="figure">
+					     <img src="./assets/img/post/pinhole.jpg" class="figure-img img-fluid rounded" alt="Basic Principle" width="600px">
+					     <figcaption class="figure-caption text-center">Basic Principle</figcaption>
+					 </figure>
+				</div>
+
+				<p>Below is a sequence of "focus stack" at 4 visibly different depths through the scene. We do so by changing our focal length of the camera.</p>
+
+				<div class="row">
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-d1.png" class="figure-img img-fluid rounded" alt="Dragon via Focal Length of 1.5">
+					        <figcaption class="figure-caption text-center">Dragon via Focal Length of 1.5</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-d2.png" class="figure-img img-fluid rounded" alt="Dragon via Focal Length of 1.7">
+					        <figcaption class="figure-caption text-center">Dragon via Focal Length of 1.7</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-d3.png" class="figure-img img-fluid rounded" alt="Dragon via Focal Length of 2.0">
+					        <figcaption class="figure-caption text-center">Dragon via Focal Length of 2.0</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-d4.png" class="figure-img img-fluid rounded" alt="Dragon via Focal Length of 2.5">
+					        <figcaption class="figure-caption text-center">Dragon via Focal Length of 2.5</figcaption>
+						 </figure>
+					</div>
+				</div>
+
+				<p>As we can see, when we increase the focal length, the image focuses on different parts of the rendering image. Specifically, because the dragon is positioned diagonally through the scene, as we increase the focal length, the camera focus moves from the head of dragon to its tail.</p>
+
+				<p>Below is a sequence of pictures with visibly different aperture sizes, all focused at the same point in a scene. We do so by changing our aperture size of the camera.</p>
+
+
+				<div class="row">
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-a1.png" class="figure-img img-fluid rounded" alt="Dragon via Aperture Size of 0.0183883">
+					        <figcaption class="figure-caption text-center">Dragon via Aperture Size of 0.0183883</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-a2.png" class="figure-img img-fluid rounded" alt="Dragon via Aperture Size of 0.0483883">
+					        <figcaption class="figure-caption text-center">Dragon via Aperture Size of 0.0483883</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-a3.png" class="figure-img img-fluid rounded" alt="Dragon via Aperture Size of 0.1283883">
+					        <figcaption class="figure-caption text-center">Dragon via Aperture Size of 0.1283883</figcaption>
+						 </figure>
+					</div>
+					<div class="col-md-6">
+					    <figure class="figure">
+					        <img src="./assets/img/result/part4/part4-a4.png" class="figure-img img-fluid rounded" alt="Dragon via Aperture Size of 0.228388">
+					        <figcaption class="figure-caption text-center">Dragon via Aperture Size of 0.2283883</figcaption>
+						 </figure>
+					</div>
+				</div>
+
+				<p>As we can see from above, as we increase the size of the aperture, the background becomes blurrier and blurrier, but the tip of the dragon's mouth is kept in focus.</p>
+
+
+				<h2 id="part5"><b>Part 5: Shading</b></h2>
+
+				<p style="color:#00ab6b">For this section, you can view a <b>LIVE</b> demo of real time rendering <a href="gl/index.html" target="_blank" id="shader_live" style="text-decoration: underline">here</a>.</p>
+
+				<p>In previous parts, we've been doing all of our computation on CPU. One major issue is that we have to wait several minutes to render a <b>single</b> frame with any realistic lighting, even with threading. However, for real-time and interactive applications like gaming, which often have framerates of 60fps, this is just <b>impossibly slow</b>.</p> 
+
+				<p>Therefore, in this part, I will explore how things may be accelerated by writing a few basic GLSL shader programs.</p>
+
+				<p>In a high level, a shader program is an isolated program that runs in parallel on GPU, so it's very fast. A shader program describes a set of relevant operation on a single vertex, or fragment. The vertex shader manipulates the attributes of vertices (e.g. points on the geometry), and the fragment shader computes attributes such as colors and textures for each pixel, either through sampling or interpolations between vertices.</p>
+
+				<p>By combining vertex and fragments, we can render 3D modles with lighting, shadows, and materials.</p>
+
+				<p>Here I implement the Blinn-Phong shading model, which renders through three components: ambient, diffuse, and specular components. Ambient shading is the shading that doesn't depend on anything. It simply adds constant color to account for  disregarded illumination and fill in black shadows. The diffuse shading factors in light, color, power and attenuation under the effects of light reflection etc. for the rendering. The specular shading captures reflections on surfaces (e.g. highlights) facing the viewer. By combing these three components, the Blinn-Phong model produces realistically rendering.</p>
+
+				<div class="text-center">
+					<figure class="figure">
+					     <img src="./assets/img/post/bprm.png" class="figure-img img-fluid rounded" alt="Blinn-Phong Reflection Model" width="700px">
+					     <figcaption class="figure-caption text-center">Blinn-Phong Reflection Model</figcaption>
+					 </figure>
+				</div>
+
+				<p>Below demonstrates the idea and effects of the Blinn-Phong shader model:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/ambient.jpg" class="figure-img img-fluid rounded" alt="Ambient Component">
+                            <figcaption class="figure-caption text-center">Ambient Component</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/diffuse.jpg" class="figure-img img-fluid rounded" alt="Diffuse Component">
+                            <figcaption class="figure-caption text-center">Diffuse Component</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/specular.jpg" class="figure-img img-fluid rounded" alt="Specular Component">
+                            <figcaption class="figure-caption text-center">Specular Component</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col-md-6">
+                        <figure class="figure">
+					     <img src="./assets/img/result/part5/blinn-phong.jpg" class="figure-img img-fluid rounded" alt="Entire Blinn-Phon Model">
+					     <figcaption class="figure-caption text-center">Entire Blinn-Phon Model</figcaption>
+					 	</figure>
+                    </div>
+				</div>
+
+
+				<p>As you can see, the Blinn-Phong model captures different information about the rendering and the combined result is pretty amazing.</p>
+
+				<p>We can also add custom textures to the model. Note, for the rest of the demo, I will use the following two textures:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+						<figure class="figure">
+	                        <img src="./assets/img/result/part5/water.jpg" class="figure-img img-fluid rounded" alt="Texture Map - Water">
+	                        <figcaption class="figure-caption text-center">Texture Map - Water</figcaption>
+	                    </figure>
+	                </div>
+					<div class="col-md-6">
+						<figure class="figure">
+		                    <img src="./assets/img/result/part5/stone.jpg" class="figure-img img-fluid rounded" alt="Texture Map - Stone" >
+		                    <figcaption class="figure-caption text-center">Texture Map - Stone</figcaption>
+		                </figure>
+	                </div>
+				</div>
+
+
+				<p>Below is a rendered sphere with water-like surface:</p>
+
+				<div class="text-center">
+
+	                <figure class="figure">
+                        <img src="./assets/img/result/part5/texture.jpg" class="figure-img img-fluid rounded" alt="Water Textured Sphere" width="450px">
+                        <figcaption class="figure-caption text-center">Water Textured Sphere</figcaption>
+                    </figure>
+				</div>
+
+
+				<p>We can use textures for more than just determining the color on a mesh. With displacement and bump mapping, we can encode a height map in a texture to be processed and applied by a shader program in order to produce more complicated geometry.</p>
+
+
+				<p>Below shows the bump mapping and displacement mapping of a sphere using the stone texture: </p>
+
+				<div class="row">
+					<div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/bump-256.jpg" class="figure-img img-fluid rounded" alt="Bump Mapping">
+                            <figcaption class="figure-caption text-center">Bump Mapping</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/displacement-256.jpg" class="figure-img img-fluid rounded" alt="Displacement Mapping">
+                            <figcaption class="figure-caption text-center">Displacement Mapping</figcaption>
+                        </figure>
+                    </div>
+				</div>
+
+				<p>Bump mapping manipulates surface normals so the surface looks a lot more rough and uneven. Displacement mapping manipulates both surface normals and vertex positions so we can achieve effects that make the sphere surface have even larger variations. Specifically for the rendering of stone balls as shown above, bump mapping makes the ball look more rigid, and with clever parameter combination, the displacement mapping can make the ball even look more rigid, or appear fluffy and soft.</p>
+
+				<p>We can also change the mesh coarseness by modifying the number of vertical and horizontal components for each model to achieve different material effects. Below are some examples:</p>
+
+				<div class="row">
+					<div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/bump-20.jpg" class="figure-img img-fluid rounded" alt="Bump Mapping with Coarseness of 20">
+                            <figcaption class="figure-caption text-center">Bump Mapping at Coarseness of 20</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/bump-500.jpg" class="figure-img img-fluid rounded" alt="Bump Mapping with Coarseness of 500">
+                            <figcaption class="figure-caption text-center">Bump Mapping at Coarseness of 500</figcaption>
+                        </figure>
+                    </div>
+				</div>
+
+				<div class="row">
+                    <div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/displacement-20.jpg" class="figure-img img-fluid rounded" alt="Displacement Mapping with Coarseness of 20">
+                            <figcaption class="figure-caption text-center">Displacement Mapping at Coarseness of 20</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col-md-6">
+                        <figure class="figure">
+                            <img src="./assets/img/result/part5/displacement-500.jpg" class="figure-img img-fluid rounded" alt="Displacement Mapping with Coarseness of 500">
+                            <figcaption class="figure-caption text-center">Displacement Mapping at Coarseness of 500</figcaption>
+                        </figure>
+                    </div>
+				</div>
+
+				<p>As we can see, with a smaller mesh coarseness, rendered objects generally look smoother and with a higher mesh coarseness, the rendered object are much more rough as expected. The resulting rendering can look very different given different mesh coarseness settings as well.</p>
+
+				<p>Lastly but not the least, I made a custom shader that produces a moving vibrating Torus Knot. It is a torus geometry with a color-changing shading material. The image doesn't do it's fun justice, so feel free to take a look <a href="gl/index.html" target="_blank" id="shader_live_2">live</a>.</p>
+
+				<div class="text-center">
+					<figure class="figure">
+                        <img src="./assets/img/result/part5/custom.jpg" class="figure-img img-fluid rounded" alt="" width="400px">
+                        <figcaption class="figure-caption text-center"></figcaption>
+                    </figure>
+                </div>
+
+
+			</div>
+			<!-- End Post Content -->
+
+			<!-- Begin Tags -->
+			<div class="after-post-tags">
+				<ul class="tags">
+					<li><a href="#" class="disabled">Ray Tracing</a></li>
+					<li><a href="#" class="disabled">Illumination</a></li>
+					<li><a href="#" class="disabled">Microfacet</a></li>
+					<li><a href="#" class="disabled">Material Rendering</a></li>
+					<li><a href="#" class="disabled">Real Time Rendering</a></li>
+					<li><a href="#" class="disabled">Computer Graphics</a></li>
+				</ul>
+			</div>
+			<!-- End Tags -->
+
+		</div>
+		<!-- End Post -->
+
+	</div>
+</div>
+<!-- End Article
+================================================== -->
+
+<div class="hideshare"></div>
+
+<!-- Begin Footer
+================================================== -->
+<div class="container">
+	<div class="footer">
+		<p class="pull-left">
+			 Copyright &copy; CS 184: Computer Graphics and Imaging, Spring 2018
+		</p>
+		<p class="pull-right">
+			 Gan Tu, cs184-adt
+		</p>
+		<div class="clearfix">
+		</div>
+	</div>
+</div>
+<!-- End Footer
+================================================== -->
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="./assets/js/jquery.min.js"></script>
+<script src="./assets/js/tether.min.js"></script>
+<script src="./assets/js/bootstrap.min.js"></script>
+<script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+<script src="./assets/js/mediumish.js"></script>
+<script src="./assets/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+	// ===== Scroll to Top ==== 
+$(window).scroll(function() {
+    if ($(this).scrollTop() >= 50) {        // If page is scrolled more than 50px
+        $('#return-to-top').fadeIn(200);    // Fade in the arrow
+    } else {
+        $('#return-to-top').fadeOut(200);   // Else fade out the arrow
+    }
+});
+$('#return-to-top').click(function() {      // When arrow is clicked
+    $('body,html').animate({
+        scrollTop : 0                       // Scroll to top of body
+    }, 500);
+});
+</script>
+</body>
+</html>
