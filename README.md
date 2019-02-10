@@ -1,6 +1,10 @@
 # Graphic-Renderer
 A fully functional, accelerated physically-based renderer using the pathtracing algorithm.
 
+## Code Protection
+
+Upon request of the course staff, the source code will not be shown publicly on GitHub. The source code is currently password protected, zipped in `src.zip`. To request for the password for unzipping the source file, send me an email.
+
 ## Write-Up
 You can read my detailed [writeup](https://michael-tu.github.io/Graphic-Renderer/) to understand what features I have implemented, how I developed them, see many of the cool results, and view side-by-side comparisons of the performance by different techniques.
 
