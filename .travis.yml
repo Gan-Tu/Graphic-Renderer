@@ -1,13 +1,13 @@
 language: c
-install:
-- apt-get freetype
-- apt-get cmake
-script:
-- unzip -P ${PASSWORD} src.zip
-- mkdir build
-- cd build
-- cmake ..
-- make
 env:
   global:
-    secure: UGFo6xO7ZBWARtsIijpWfiHFkcRhshDEChOLbRIgohxTvMUW54ZvztwMu/k5AeGa2Sg7uhrM1ORCPomzFKr4ivbVysKuvIGtHitSse8v66/cx9uHxDwoXmoat/epPC75qadBa+PirmaHrXXSV9VBWFZIUDPMNjGn9o6/wEVJIEyaTmASug99Gtf8m6uxOrBx7oMWZxcZDZvH8BVhJuXEC56OKYiIKaoXc8E6XgYg7GsdUabkvh3OwTId/2HRMe554Su0A+D2aIjHDN3qyayEiy7OHAOfT9NT3ocdvi8jt25o8s0Iq/lsW2rUBrpuYX2U7YQ+pJMa/sCbR/4WbFvIGVu0nux/qIwVxVGITSYkIhk6OA3uDrwp9KnmfskBWKferA1+sdxa6AoIPng8QWAjk/aORrbTYKV8IFiQb1ip53NgxtbzHO7cCVxAN/NlY0dwLhTAdpvcpSn8r5yCH8lm12hBMUA4EtBo4/LP4aOTpnrDstYagTAhHpPprDFv9UssW8YI5Zw1g/Icp9PJ4tz6e0BdVrrrB6Y54LmAsbXY9CEXBIfyeGL0v95/Ie31SR4978+FHS+ZjVpkmvzeEQYLrEgAJ9DQqL/w0RV0EAGzTD2pErL/c9kRhE1/1C+KV8KjCQNWQq9KGZQ2ZzoljnW9x11AOJDW6/H0d7U5VRxwwo4=
+    secure: bmXk6nJWtrPlLcgm+aQ9QLjHnprG/n1C9pZLmhiOwzingRAeZ1ELlW9G2So/3BSa0/nrCgh0qt0+66s/lZfAXWtJpnRfYsCzMDWbPB2aVnMCC+6kxCtw4g6DmpxlL9fynkElSBQ+zd92wsoeBEUz5YMkmSk7s3UZEjS0/513hJ0Qrv7CcDeG46cJ1Q3GSVP8oB/KxzCMHbnj0NPA5bNoQGvjKJ5B7usBts7/I9gvZO5PZWSbPLereNgsocTSkH3RTRNJVV4tzO91LJgmWMcXNeTRIqdUiwUKdK5Btp+hL+Usm/A/9PCqYMSuHOyqa0UWNf9RG9RrBuyWy/GpRGmyQ/Jae6Vk/o8ET1zaALIM48T//qloeitnq1BKALzYx6WnntyWzGuwj7iMLdctJ/agCvl0ODD3eZd3Mvw5TmBgNwX7xMpGj5p3Yg+nXSf6SDNVRdfCNSGF7DhI1MazXH1WEEPfDwpdjyfJGk18ZJLpjjbTrRSnrCKFOkqXdhWyQiKRGmbrTiEbHM+rG5ftc+nQdQjSXfEOJiay9B7sp0ryeKc9zYfS1Cqkm/sVND1vK9Q5h8CRiHA5vR2PTyKR0IVEDk2b0NZzL4v7EI3quIXTKj8ZR9wp8RtPqlRvEaEWmaoAJkacXhanbhi5aBviLsx3UxmjmRzifDwaB0nNCNKUheY=
+install:
+  - sudo apt-get install cmake
+script:
+  - echo ${PASSWORD}
+  - unzip -P ${PASSWORD} src.zip
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
