@@ -1,11 +1,8 @@
 language: c
-env:
-  global:
-    secure: bmXk6nJWtrPlLcgm+aQ9QLjHnprG/n1C9pZLmhiOwzingRAeZ1ELlW9G2So/3BSa0/nrCgh0qt0+66s/lZfAXWtJpnRfYsCzMDWbPB2aVnMCC+6kxCtw4g6DmpxlL9fynkElSBQ+zd92wsoeBEUz5YMkmSk7s3UZEjS0/513hJ0Qrv7CcDeG46cJ1Q3GSVP8oB/KxzCMHbnj0NPA5bNoQGvjKJ5B7usBts7/I9gvZO5PZWSbPLereNgsocTSkH3RTRNJVV4tzO91LJgmWMcXNeTRIqdUiwUKdK5Btp+hL+Usm/A/9PCqYMSuHOyqa0UWNf9RG9RrBuyWy/GpRGmyQ/Jae6Vk/o8ET1zaALIM48T//qloeitnq1BKALzYx6WnntyWzGuwj7iMLdctJ/agCvl0ODD3eZd3Mvw5TmBgNwX7xMpGj5p3Yg+nXSf6SDNVRdfCNSGF7DhI1MazXH1WEEPfDwpdjyfJGk18ZJLpjjbTrRSnrCKFOkqXdhWyQiKRGmbrTiEbHM+rG5ftc+nQdQjSXfEOJiay9B7sp0ryeKc9zYfS1Cqkm/sVND1vK9Q5h8CRiHA5vR2PTyKR0IVEDk2b0NZzL4v7EI3quIXTKj8ZR9wp8RtPqlRvEaEWmaoAJkacXhanbhi5aBviLsx3UxmjmRzifDwaB0nNCNKUheY=
 install:
   - sudo apt-get install cmake
+  - sudo apt-get install xorg-dev libglu1-mesa-dev
 script:
-  - echo ${PASSWORD}
   - unzip -P ${PASSWORD} src.zip
   - mkdir build
   - cd build
