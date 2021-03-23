@@ -1,6 +1,6 @@
 # Graphic-Renderer
 
-[![Build Status](https://travis-ci.com/Michael-Tu/Graphic-Renderer.svg?branch=master)](https://travis-ci.com/Michael-Tu/Graphic-Renderer)
+[![Build Status](https://travis-ci.com/Gan-Tu/Graphic-Renderer.svg?branch=master)](https://travis-ci.com/Gan-Tu/Graphic-Renderer)
 
 A fully functional, accelerated physically-based renderer using the pathtracing algorithm.
 
