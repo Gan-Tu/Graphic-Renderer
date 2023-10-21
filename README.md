@@ -4,6 +4,8 @@
 
 A fully functional, accelerated physically-based renderer using the pathtracing algorithm.
 
+<img src="https://raw.githubusercontent.com/Gan-Tu/Graphic-Renderer/master/docs/assets/img/E17B0998-37A3-466B-A969-FED0DEC58AD9.webp" width="400" height="400">
+
 ## Code Protection
 
 Upon request of the course staff, the source code will not be shown publicly on GitHub. The source code is currently password protected, zipped in `src.zip`. To request for the password for unzipping the source file, send me an email.
